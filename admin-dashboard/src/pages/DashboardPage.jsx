@@ -106,6 +106,10 @@ const DashboardPage = () => {
           >
             Logout
           </button>
+           <button onClick={() =>
+             navigate('/add-product')} className="bg-emerald-600 text-black py-2 px-6 rounded-lg font-semibold hover:bg-emerald-700 transition">
+        Add New Product
+      </button>
         </div>
 
         {loading && <p className="text-white mt-4">Loading products...</p>}

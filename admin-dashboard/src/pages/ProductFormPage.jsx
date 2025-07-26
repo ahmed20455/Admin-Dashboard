@@ -1,166 +1,157 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 
 const ProductFormPage = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); // This gets the :id param from URL
+  const isEdit = !!id;
 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     category: '',
-    stock: '',
+    stock: ''
   });
-
-  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const [error, setError] = useState('');
 
-  const validate = () => {
-    const newErrors = {};
+  // Fetch existing product if editing
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!isEdit) return;
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) {
+        console.error('Failed to fetch product:', error.message);
+        setError('Could not load product data.');
+        return;
+      }
+      setFormData(data);
+    };
 
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.price) newErrors.price = 'Price is required';
-    else if (isNaN(formData.price)) newErrors.price = 'Price must be a number';
-
-    if (!formData.stock) newErrors.stock = 'Stock is required';
-    else if (isNaN(formData.stock)) newErrors.stock = 'Stock must be a number';
-
-    return newErrors;
-  };
+    fetchProduct();
+  }, [id, isEdit]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear the error as the user types
-    setErrors((prev) => ({
-      ...prev,
-      [name]: '',
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitError(null);
+    setSubmitting(true);
+    setError('');
 
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    const { name, price, stock } = formData;
+    if (!name || !price || !stock || isNaN(price) || isNaN(stock)) {
+      setError('Please fill in all required fields with valid numbers.');
+      setSubmitting(false);
       return;
     }
 
-    setSubmitting(true);
-
     try {
-      const { error } = await supabase.from('products').insert([{
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        category: formData.category,
-        stock: parseInt(formData.stock),
-      }]);
-
-      if (error) throw error;
-
-      console.log('Product added!');
+      if (isEdit) {
+        await supabase.from('products').update(formData).eq('id', id);
+        console.log('Product updated!');
+      } else {
+        await supabase.from('products').insert([formData]);
+        console.log('Product added!');
+      }
       navigate('/dashboard');
     } catch (err) {
-      console.error(err);
-      setSubmitError('Failed to add product. Please try again.');
+      console.error('Submission error:', err.message);
+      setError('Failed to submit the form.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ...existing code...
   return (
-    <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-emerald-400 via-sky-500 to-indigo-500 px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-md w-full max-w-xl p-8 space-y-6"
-      >
-        <h2 className="text-2xl font-bold text-gray-800 text-center">Add Product</h2>
+    <div
+      className="h-screen w-screen flex items-center justify-center"
+      style={{
+        background: 'linear-gradient(135deg, #38e8ff 0%, #4f8cff 100%)',
+        animation: 'gradientMove 8s ease-in-out infinite alternate',
+      }}
+    >
+      <style>
+        {`
+          @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+          }
+          .glass-form {
+            background: rgba(255,255,255,0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.18);
+            transition: box-shadow 0.3s;
+          }
+          .glass-form:hover {
+            box-shadow: 0 16px 48px 0 rgba(31, 38, 135, 0.37);
+          }
+          .input-focus:focus {
+            border-color: #38e8ff;
+            box-shadow: 0 0 0 2px #38e8ff33;
+          }
+          .form-btn {
+            background: linear-gradient(90deg, #4f8cff 0%, #38e8ff 100%);
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(79,140,255,0.15);
+          }
+          .form-btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 4px 16px rgba(79,140,255,0.25);
+            background: linear-gradient(90deg, #38e8ff 0%, #4f8cff 100%);
+          }
+        `}
+      </style>
+      <div className="glass-form p-8 w-full max-w-md flex flex-col items-center mx-2">
+        <h2 className="text-2xl font-extrabold text-gray-800 tracking-wide mb-6">
+          {isEdit ? 'Edit Product' : 'Add Product'}
+        </h2>
 
-        {submitError && <p className="text-red-600 text-sm text-center">{submitError}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-4 px-2 py-1 rounded bg-red-50 border border-red-200 w-full text-center">
+            {error}
+          </p>
+        )}
 
-        {/* Name */}
-        <div>
-          <label className="block font-semibold text-gray-700">Name *</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full border rounded p-2 mt-1"
-          />
-          {errors.name && <p className="text-red-600 text-sm">{errors.name}</p>}
-        </div>
+        <form onSubmit={handleSubmit} className="w-full space-y-4">
+          {['name', 'description', 'price', 'category', 'stock'].map(field => (
+            <div key={field}>
+              <label className="block text-sm font-semibold mb-2 text-gray-700 capitalize">
+                {field}
+              </label>
+              <input
+                type={['price', 'stock'].includes(field) ? 'number' : 'text'}
+                name={field}
+                value={formData[field]}
+                onChange={handleChange}
+                className="input-focus w-full border border-gray-300 p-3 rounded-lg bg-white bg-opacity-80 text-gray-900 transition"
+                required={['name', 'price', 'stock'].includes(field)}
+              />
+            </div>
+          ))}
 
-        {/* Description */}
-        <div>
-          <label className="block font-semibold text-gray-700">Description</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            className="w-full border rounded p-2 mt-1"
-          />
-        </div>
-
-        {/* Price */}
-        <div>
-          <label className="block font-semibold text-gray-700">Price (₹) *</label>
-          <input
-            type="text"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            className="w-full border rounded p-2 mt-1"
-          />
-          {errors.price && <p className="text-red-600 text-sm">{errors.price}</p>}
-        </div>
-
-        {/* Category */}
-        <div>
-          <label className="block font-semibold text-gray-700">Category</label>
-          <input
-            type="text"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full border rounded p-2 mt-1"
-          />
-        </div>
-
-        {/* Stock */}
-        <div>
-          <label className="block font-semibold text-gray-700">Stock *</label>
-          <input
-            type="text"
-            name="stock"
-            value={formData.stock}
-            onChange={handleChange}
-            className="w-full border rounded p-2 mt-1"
-          />
-          {errors.stock && <p className="text-red-600 text-sm">{errors.stock}</p>}
-        </div>
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-black font-bold py-2 px-4 rounded transition"
-        >
-          {submitting ? 'Submitting...' : 'Submit'}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="form-btn w-full text-white font-bold py-3 rounded-lg text-lg shadow-lg"
+          >
+            {submitting ? 'Submitting...' : isEdit ? 'Update Product' : 'Add Product'}
+          </button>
+        </form>
+      </div>
     </div>
   );
-};
+}
 
 export default ProductFormPage;

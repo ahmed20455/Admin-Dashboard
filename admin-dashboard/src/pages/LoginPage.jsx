@@ -119,7 +119,7 @@ const LoginPage = () => {
         </form>
 
         <div className="mt-6 text-xs text-gray-500 text-center">
-          &copy; {new Date().getFullYear()} Faheem Admin Dashboard
+          &copy; {new Date().getFullYear()} Admin Dashboard By Faheem
         </div>
       </div>
     </div>

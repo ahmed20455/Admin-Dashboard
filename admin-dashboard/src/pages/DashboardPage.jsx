@@ -118,7 +118,7 @@ const DashboardPage = () => {
             {/* NavBar */}
             <nav className="w-full max-w-5xl mt-6 mb-4 px-4 py-3 rounded-xl bg-white/30 backdrop-blur-md shadow flex flex-wrap justify-between items-center">
                 <div className="flex items-center gap-4 flex-wrap">
-                    <span className="text-2xl font-bold text-indigo-900 tracking-tight">Faheem Admin</span>
+                    <span className="text-2xl font-bold text-indigo-900 tracking-tight">Admin Dashboard</span>
                     <button
                         onClick={() => navigate('/dashboard')}
                         className="text-indigo-700 hover:text-indigo-900 font-semibold px-3 py-1 rounded transition"
@@ -145,23 +145,27 @@ const DashboardPage = () => {
                 <p className="text-sm text-white/80 mb-4 text-center">Manage your products efficiently and easily.</p>
 
                 {/* Search Bar */}
-                <input
-                    type="text"
-                    placeholder="Search by name or category..."
-                    className="w-full md:w-1/2 mb-4 p-2 rounded shadow border text-black"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
+<div className="w-full flex justify-center mb-4">
+    <input
+        type="text"
+        placeholder="Search by name or category..."
+        className="w-full md:w-1/2 p-2 rounded shadow border text-black"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+    />
+</div>
 
-                {loading && (
-                    <div className="flex justify-center items-center mt-6">
-                        <svg className="animate-spin h-6 w-6 text-white mr-2" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" />
-                            <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                        <span>Loading products...</span>
-                    </div>
-                )}
+
+{loading && (
+    <div className="flex justify-center items-center mt-6 min-h-[200px]">
+        <svg className="animate-spin h-6 w-6 text-white mr-2" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" />
+            <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
+        <span>Loading products...</span>
+    </div>
+)}
+
 
                 {error && (
                     <div className="bg-red-100 text-red-700 border border-red-400 px-4 py-2 rounded mt-4 text-center">
@@ -221,7 +225,7 @@ const DashboardPage = () => {
                 )}
 
                 <p className="mt-6 text-xs text-center text-white/70">
-                    &copy; {new Date().getFullYear()} Faheem Admin Dashboard
+                    &copy; {new Date().getFullYear()} Admin Dashboard By Faheem
                 </p>
             </div>
         </div>

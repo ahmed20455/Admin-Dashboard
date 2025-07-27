@@ -133,24 +133,40 @@ const DashboardPage = () => {
                             </thead>
 
                             <tbody>
-                                {products.map(prod => (
-                                    <tr key={prod.id}>
-                                        <td>{prod.name}</td>
-                                        <td>{prod.category}</td>
-                                        <td>₹{prod.price}</td>
-                                        <td>{prod.stock}</td>
-                                        <td>
-                                            <button
-                                                onClick={() => navigate(`/products/edit/${prod.id}`)}
-                                                className="bg-blue-600 text-black
-                                                 px-4 py-1 rounded hover:bg-blue-700 transition"
-                                            >
-                                                Edit
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
+  {products.map((prod) => (
+    <tr key={prod.id}>
+      <td>{prod.name}</td>
+      <td>{prod.category}</td>
+      <td>₹{prod.price}</td>
+      <td>{prod.stock}</td>
+      <td className="flex gap-2">
+        <button
+          onClick={() => navigate(`/products/edit/${prod.id}`)}
+          className="bg-blue-600 text-black px-4 py-1 rounded hover:bg-blue-700 transition"
+        >
+          Edit
+        </button>
+        <button
+          onClick={async () => {
+            const confirmDelete = window.confirm('Are you sure you want to delete this product?');
+            if (!confirmDelete) return;
+
+            const { error } = await supabase.from('products').delete().eq('id', prod.id);
+            if (error) {
+              alert('Error deleting product: ' + error.message);
+            } else {
+              setProducts(prev => prev.filter(p => p.id !== prod.id));
+            }
+          }}
+          className="bg-red-600 text-black px-4 py-1 rounded hover:bg-red-700 transition"
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
                         </table>
                     </div>
                 )}

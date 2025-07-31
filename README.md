@@ -52,7 +52,7 @@ src/
 - **Styling:** Easily customize with Tailwind and shadcn/ui.
 - **Validation:** Enhance forms with react-hook-form and yup for professional UX.
 ## 🌐 Live URL
-- [https://your-project-name.vercel.app](https://admin-dashboard-sable-psi.vercel.app/)
+- [Live URL](https://admin-dashboard-sable-psi.vercel.app/)
 ## License
 
 MIT
